@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o github-repo-raw-urls-ui ./...
+RUN CGO_ENABLED=0 go build -o github-repo-raw-urls-ui .
 
 # Runtime-Stage
 FROM alpine:3.20
