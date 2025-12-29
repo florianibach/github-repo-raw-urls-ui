@@ -89,7 +89,7 @@
         <p class="text-muted mb-2">
           You can copy this list (or parts of it) and paste it into chat.
         </p>
-
+        
         {{ range .RawURLs }}
           <span class="d-block"><code>{{ . }}</code></span>        
         {{ end }}
@@ -141,24 +141,40 @@
 </script>
 
 <script>
-    function copyAll() {
-        const text = document.getElementById("rawList").innerText;
-        const btn = document.getElementById("copyBtn");
+  function copyAll() {
+    const btn = document.getElementById("copyBtn");
+    const resultsCard = document.getElementById("resultsCard");
+    if (!resultsCard) return;
 
-        navigator.clipboard.writeText(text).then(() => {
-            const originalText = btn.innerText;
+    // Collect all code lines inside the results card
+    const codes = Array.from(resultsCard.querySelectorAll("span.d-block > code"));
+    const text = codes.map(c => (c.textContent || "").trim()).filter(Boolean).join("\n");
 
-            btn.innerText = "Copied";
-            btn.classList.remove("btn-outline-secondary");
-            btn.classList.add("btn-secondary");
+    if (!text) return;
 
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.classList.remove("btn-secondary");
-                btn.classList.add("btn-outline-secondary");
-            }, 1500);
-        });
-    }
+    navigator.clipboard.writeText(text).then(() => {
+      if (!btn) return;
+
+      const originalText = btn.innerText;
+
+      btn.innerText = "Copied";
+      btn.classList.remove("btn-outline-secondary");
+      btn.classList.add("btn-secondary");
+
+      setTimeout(() => {
+        btn.innerText = originalText;
+        btn.classList.remove("btn-secondary");
+        btn.classList.add("btn-outline-secondary");
+      }, 1500);
+    }).catch(() => {
+      // Optional: fallback if clipboard permission is denied
+      // You could show an alert or switch button text to "Copy failed"
+      if (!btn) return;
+      const originalText = btn.innerText;
+      btn.innerText = "Copy failed";
+      setTimeout(() => { btn.innerText = originalText; }, 1500);
+    });
+  }
 </script>
 
 </body>
