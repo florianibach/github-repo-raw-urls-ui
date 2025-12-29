@@ -50,18 +50,15 @@
         <div class="mb-3">
           <label for="branch" class="form-label">Branch</label>
           <select id="branch" name="branch" class="form-select">
+            <option value="">Use default branch</option>
             {{ if .Branches }}
-              <option value="">Use default branch</option>
               {{ range .Branches }}
                 <option value="{{ .Name }}" {{ if eq $.Branch .Name }}selected{{ end }}>
                   {{ .Name }}{{ if .Default }} (default){{ end }}
                 </option>
-              {{ end }}
-            {{ else }}
-              <option value="">No repository loaded yet</option>
+              {{ end }}              
             {{ end }}
           </select>
-          <div class="form-text">The default branch is marked with “(default)”.</div>
         </div>
 
         {{ if .Error }}
@@ -78,7 +75,7 @@
 
   <!-- Results card -->
   {{ if .RawURLs }}
-    <div class="card shadow-sm mt-4">
+    <div id="resultsCard" class="card shadow-sm mt-4">
       <div class="card-body">
 
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -102,6 +99,45 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function () {
+    const repoInput = document.getElementById("repoUrl");
+    const branchSelect = document.getElementById("branch");
+    const resultsCard = document.getElementById("resultsCard");
+
+    if (!repoInput || !branchSelect) return;
+
+    // remember initial value rendered by the server
+    const initialRepoUrl = (repoInput.value || "").trim();
+    let lastValue = initialRepoUrl;
+
+    function resetUI() {
+      // reset branch to default option (value="")
+      branchSelect.value = "";
+
+      // hide results if present (so user sees "clean" UI immediately)
+      if (resultsCard) {
+        resultsCard.classList.add("d-none");
+      }
+    }
+
+    repoInput.addEventListener("input", () => {
+      const current = (repoInput.value || "").trim();
+
+      // Only reset when the user actually changed the repo URL compared to what we last saw
+      if (current !== lastValue) {
+        lastValue = current;
+
+        // If they've diverged from the initial URL that produced results, reset.
+        // (Also covers the case where there were no results yet—still safe.)
+        if (current !== initialRepoUrl) {
+          resetUI();
+        }
+      }
+    });
+  })();
+</script>
+
 <script>
     function copyAll() {
         const text = document.getElementById("rawList").innerText;
