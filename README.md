@@ -35,7 +35,11 @@ This service helps you quickly generate a **complete list of raw file links**, s
 In short:  
 **Give the AI the repo via links instead of copy & paste.**
 
----
+## Screenshots
+
+### Repository scan
+![Overview](https://raw.githubusercontent.com/florianibach/github-repo-raw-urls-ui/docs/screenshots/overview.png)
+
 
 ## Features
 
