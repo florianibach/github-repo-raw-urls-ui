@@ -19,6 +19,7 @@ WORKDIR /app
 
 COPY --from=builder /app/github-repo-raw-urls-ui /app/github-repo-raw-urls-ui
 COPY --from=builder /app/templates /app/templates
+COPY --from=builder /app/static /app/static
 
 EXPOSE 8080
 
