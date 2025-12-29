@@ -73,25 +73,64 @@
   </div>
 
   {{ if .RawURLs }}
-  <div class="row mb-4">
+    <div class="row mb-4">
     <div class="col-lg-8 offset-lg-2">
-      <div class="card shadow-sm">
+        <div class="card shadow-sm">
         <div class="card-body">
-          <h5 class="card-title">Gefundene Raw-Links ({{ len .RawURLs }})</h5>
-          <p class="card-text">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">Gefundene Raw-Links ({{ len .RawURLs }})</h5>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    id="copyBtn">
+                Alle kopieren
+            </button>
+            </div>
+            <p class="card-text">
             Du kannst diese Liste (oder Teile davon) kopieren und hier im Chat posten.
-          </p>
-          <textarea class="form-control" rows="15" readonly>
-{{ range .RawURLs }}{{ . }}
-{{ end }}</textarea>
+            </p>
+            <textarea class="form-control" rows="15" readonly id="rawTextarea">
+    {{ range .RawURLs }}{{ . }}
+    {{ end }}</textarea>
         </div>
-      </div>
+        </div>
     </div>
-  </div>
-  {{ end }}
+    </div>
+    {{ end }}
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var copyBtn = document.getElementById('copyBtn');
+  var textarea = document.getElementById('rawTextarea');
+
+  if (copyBtn && textarea) {
+    copyBtn.addEventListener('click', function () {
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textarea.value)
+          .then(function () {
+            copyBtn.textContent = 'Kopiert!';
+            copyBtn.classList.remove('btn-outline-secondary');
+            copyBtn.classList.add('btn-success');
+            setTimeout(function () {
+              copyBtn.textContent = 'Alle kopieren';
+              copyBtn.classList.remove('btn-success');
+              copyBtn.classList.add('btn-outline-secondary');
+            }, 1500);
+          })
+          .catch(function () {
+            document.execCommand('copy');
+          });
+      } else {
+        document.execCommand('copy');
+      }
+    });
+  }
+});
+</script>
 </body>
 </html>
 {{ end }}
