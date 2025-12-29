@@ -7,10 +7,12 @@ import (
 )
 
 type PageData struct {
-	RepoURL string
-	Branch  string
-	RawURLs []string
-	Error   string
+	RepoURL       string
+	Branch        string
+	Branches      []Branch
+	DefaultBranch string
+	RawURLs       []string
+	Error         string
 }
 
 func main() {
@@ -27,20 +29,45 @@ func main() {
 				return
 			}
 			repoURL := r.FormValue("repoUrl")
-			branch := r.FormValue("branch")
+			selectedBranch := r.FormValue("branch")
 
 			data.RepoURL = repoURL
-			data.Branch = branch
 
-			raws, err := ListRawURLs(repoURL, branch)
+			owner, repo, err := parseRepoURL(repoURL)
+			if err != nil {
+				data.Error = err.Error()
+				renderTemplate(w, tmpl, data)
+				return
+			}
+
+			branches, defaultBranch, err := getBranches(owner, repo)
+			if err != nil {
+				data.Error = err.Error()
+				renderTemplate(w, tmpl, data)
+				return
+			}
+			data.Branches = branches
+			data.DefaultBranch = defaultBranch
+
+			// Wenn kein Branch gewählt wurde, Default
+			if selectedBranch == "" {
+				selectedBranch = defaultBranch
+			}
+			data.Branch = selectedBranch
+
+			raws, err := ListRawURLsWithOwnerRepo(owner, repo, selectedBranch)
 			if err != nil {
 				data.Error = err.Error()
 				renderTemplate(w, tmpl, data)
 				return
 			}
 			data.RawURLs = raws
+
+			renderTemplate(w, tmpl, data)
+			return
 		}
 
+		// GET: nur Anzeige, ohne Scan
 		renderTemplate(w, tmpl, data)
 	})
 

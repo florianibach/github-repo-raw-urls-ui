@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,6 +30,15 @@ type TreeObject struct {
 	Sha  string `json:"sha"`
 	URL  string `json:"url"`
 	Size int    `json:"size"`
+}
+
+type Branch struct {
+	Name    string `json:"name"`
+	Default bool   `json:"-"`
+}
+
+type repoInfo struct {
+	DefaultBranch string `json:"default_branch"`
 }
 
 // parseRepoURL extrahiert owner und repo aus z.B.
@@ -88,16 +98,10 @@ func fetchTree(owner, repo, branch string) ([]TreeObject, error) {
 	return tr.Tree, nil
 }
 
-// ListRawURLs gibt alle Raw-Links für Dateien im Repo zurück.
-func ListRawURLs(repoURL, branch string) ([]string, error) {
+func ListRawURLsWithOwnerRepo(owner, repo, branch string) ([]string, error) {
 	if branch == "" {
 		branch = defaultBranch
 	}
-	owner, repo, err := parseRepoURL(repoURL)
-	if err != nil {
-		return nil, err
-	}
-
 	tree, err := fetchTree(owner, repo, branch)
 	if err != nil {
 		return nil, err
@@ -110,4 +114,93 @@ func ListRawURLs(repoURL, branch string) ([]string, error) {
 		}
 	}
 	return urls, nil
+}
+
+func ListRawURLs(repoURL, branch string) ([]string, error) {
+	owner, repo, err := parseRepoURL(repoURL)
+	if err != nil {
+		return nil, err
+	}
+	return ListRawURLsWithOwnerRepo(owner, repo, branch)
+}
+
+func getRepoInfo(owner, repo string) (*repoInfo, error) {
+	client := &http.Client{Timeout: httpTimeoutSec * time.Second}
+	apiURL := fmt.Sprintf("%s/repos/%s/%s", githubAPIBase, owner, repo)
+
+	req, err := http.NewRequest(http.MethodGet, apiURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "github-raw-ui")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("Repo nicht gefunden (HTTP 404)")
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("GitHub API Fehler (repo info): %s – %s", resp.Status, string(body))
+	}
+
+	var info repoInfo
+	if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
+		return nil, err
+	}
+	return &info, nil
+}
+
+// getBranches holt alle Branches und markiert den Default-Branch.
+func getBranches(owner, repo string) ([]Branch, string, error) {
+	client := &http.Client{Timeout: httpTimeoutSec * time.Second}
+
+	// Erst Default-Branch holen
+	info, err := getRepoInfo(owner, repo)
+	if err != nil {
+		return nil, "", err
+	}
+	defaultBranch := info.DefaultBranch
+
+	apiURL := fmt.Sprintf("%s/repos/%s/%s/branches?per_page=100", githubAPIBase, owner, repo)
+
+	req, err := http.NewRequest(http.MethodGet, apiURL, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	req.Header.Set("User-Agent", "github-raw-ui")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, "", fmt.Errorf("Branches nicht gefunden (HTTP 404)")
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, "", fmt.Errorf("GitHub API Fehler (branches): %s – %s", resp.Status, string(body))
+	}
+
+	var tmp []struct {
+		Name string `json:"name"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&tmp); err != nil {
+		return nil, "", err
+	}
+
+	branches := make([]Branch, 0, len(tmp))
+	for _, b := range tmp {
+		branches = append(branches, Branch{
+			Name:    b.Name,
+			Default: b.Name == defaultBranch,
+		})
+	}
+	return branches, defaultBranch, nil
 }

@@ -38,14 +38,28 @@
                      value="{{ .RepoURL }}">
             </div>
             <div class="mb-3">
-              <label for="branch" class="form-label">Branch (optional)</label>
-              <input type="text"
-                     class="form-control"
-                     id="branch"
-                     name="branch"
-                     placeholder="main"
-                     value="{{ .Branch }}">
-            </div>
+                <label for="branch" class="form-label">Branch</label>
+                <select class="form-select" id="branch" name="branch">
+                    {{ if .Branches }}
+                    {{ range .Branches }}
+                        <option value="{{ .Name }}"
+                        {{ if $.Branch }}
+                            {{ if eq $.Branch .Name }}selected{{ end }}
+                        {{ else }}
+                            {{ if .Default }}selected{{ end }}
+                        {{ end }}
+                        >
+                        {{ .Name }}{{ if .Default }} (default){{ end }}
+                        </option>
+                    {{ end }}
+                    {{ else }}
+                    <option value="">(noch kein Repo geladen)</option>
+                    {{ end }}
+                </select>
+                <div class="form-text">
+                    Default-Branch ist mit „(default)“ markiert.
+                </div>
+                </div>
             <button type="submit" class="btn btn-primary">Scannen</button>
           </form>
           {{ if .Error }}
