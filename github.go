@@ -11,10 +11,13 @@ import (
 	"time"
 )
 
+var (
+	githubAPIBase = "https://api.github.com"
+	rawBase       = "https://raw.githubusercontent.com"
+)
+
 const (
-	githubAPIBase  = "https://api.github.com"
-	rawBase        = "https://raw.githubusercontent.com"
-	defaultBranch  = "main"
+	defaultBranch  = "master"
 	httpTimeoutSec = 10
 )
 
