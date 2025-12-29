@@ -19,6 +19,10 @@ func main() {
 	tmpl := template.Must(template.ParseFiles("templates/index.html"))
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./favicon.ico")
+	})
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		data := PageData{}
 
