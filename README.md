@@ -38,7 +38,7 @@ In short:
 ## Screenshots
 
 ### Repository scan
-![Overview](https://raw.githubusercontent.com/florianibach/github-repo-raw-urls-ui/docs/screenshots/overview.png)
+![Overview](https://raw.githubusercontent.com/florianibach/github-repo-raw-urls-ui/refs/heads/master/docs/screenshots/overview.png)
 
 
 ## Features
