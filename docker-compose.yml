@@ -1,0 +1,6 @@
+services:
+  github-repo-raw-urls-ui:
+    build: .
+    ports:
+      - "8088:8080"
+      

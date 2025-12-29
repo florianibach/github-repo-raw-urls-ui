@@ -82,7 +82,7 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h2 class="h6 mb-0">Found raw links ({{ len .RawURLs }})</h2>
 
-          <button type="button" id="copyBtn" class="btn btn-outline-secondary btn-sm" onclick="copyAll()">
+          <button type="button" id="copyBtn" class="btn btn-outline-secondary btn-sm" onclick="copyAll(event)">
             Copy all
           </button>
         </div>
@@ -142,39 +142,60 @@
 </script>
 
 <script>
-  function copyAll() {
-    const btn = document.getElementById("copyBtn");
+  function copyAll(e) {
+    const btn = e?.currentTarget || document.getElementById("copyBtn");
     const resultsCard = document.getElementById("resultsCard");
     if (!resultsCard) return;
 
-    // Collect all code lines inside the results card
     const codes = Array.from(resultsCard.querySelectorAll("span.d-block > code"));
     const text = codes.map(c => (c.textContent || "").trim()).filter(Boolean).join("\n");
-
     if (!text) return;
 
-    navigator.clipboard.writeText(text).then(() => {
-      if (!btn) return;
+    // Preferred modern API (https / localhost only)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        copiedFeedback(btn);
+      }).catch(() => {
+        legacyCopy(text, btn);
+      });
+    } else {
+      // Fallback for http://ip, older browsers, etc.
+      legacyCopy(text, btn);
+    }
+  }
 
-      const originalText = btn.innerText;
+  function legacyCopy(text, btn) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
 
-      btn.innerText = "Copied";
-      btn.classList.remove("btn-outline-secondary");
-      btn.classList.add("btn-secondary");
+    try {
+      document.execCommand("copy");
+      copiedFeedback(btn);
+    } catch (err) {
+      if (btn) btn.innerText = "Copy failed";
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  }
 
-      setTimeout(() => {
-        btn.innerText = originalText;
-        btn.classList.remove("btn-secondary");
-        btn.classList.add("btn-outline-secondary");
-      }, 1500);
-    }).catch(() => {
-      // Optional: fallback if clipboard permission is denied
-      // You could show an alert or switch button text to "Copy failed"
-      if (!btn) return;
-      const originalText = btn.innerText;
-      btn.innerText = "Copy failed";
-      setTimeout(() => { btn.innerText = originalText; }, 1500);
-    });
+  function copiedFeedback(btn) {
+    if (!btn) return;
+
+    const originalText = btn.innerText;
+    btn.innerText = "Copied";
+    btn.classList.remove("btn-outline-secondary");
+    btn.classList.add("btn-secondary");
+
+    setTimeout(() => {
+      btn.innerText = originalText;
+      btn.classList.remove("btn-secondary");
+      btn.classList.add("btn-outline-secondary");
+    }, 1500);
   }
 </script>
 
