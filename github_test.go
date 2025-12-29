@@ -148,13 +148,13 @@ func TestGetBranches_MarksDefaultBranch(t *testing.T) {
 
 	// repo info endpoint
 	mux.HandleFunc("/repos/o/r", func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "github-raw-ui", r.Header.Get("User-Agent"))
+		assert.Equal(t, "github-repo-raw-urls-ui", r.Header.Get("User-Agent"))
 		_ = json.NewEncoder(w).Encode(repoInfo{DefaultBranch: "main"})
 	})
 
 	// branches endpoint
 	mux.HandleFunc("/repos/o/r/branches", func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "github-raw-ui", r.Header.Get("User-Agent"))
+		assert.Equal(t, "github-repo-raw-urls-ui", r.Header.Get("User-Agent"))
 		_ = json.NewEncoder(w).Encode([]map[string]string{
 			{"name": "dev"},
 			{"name": "main"},

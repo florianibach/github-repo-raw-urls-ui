@@ -24,7 +24,7 @@ func main() {
 
 		if r.Method == http.MethodPost {
 			if err := r.ParseForm(); err != nil {
-				data.Error = "Formular konnte nicht gelesen werden"
+				data.Error = "Could not read the form data"
 				renderTemplate(w, tmpl, data)
 				return
 			}
@@ -81,6 +81,6 @@ func main() {
 func renderTemplate(w http.ResponseWriter, tmpl *template.Template, data PageData) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := tmpl.ExecuteTemplate(w, "index", data); err != nil {
-		http.Error(w, "Templatefehler", http.StatusInternalServerError)
+		http.Error(w, "Template error", http.StatusInternalServerError)
 	}
 }

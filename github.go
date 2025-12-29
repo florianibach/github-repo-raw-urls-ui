@@ -54,11 +54,11 @@ func parseRepoURL(repoURL string) (owner, repo string, err error) {
 		return "", "", err
 	}
 	if u.Host != "github.com" {
-		return "", "", errors.New("URL ist keine github.com-URL")
+		return "", "", errors.New("URL must be a github.com URL")
 	}
 	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
 	if len(parts) < 2 {
-		return "", "", errors.New("URL muss die Form https://github.com/owner/repo haben")
+		return "", "", errors.New("URL must have the form https://github.com/owner/repo")
 	}
 	return parts[0], parts[1], nil
 }
@@ -88,10 +88,10 @@ func fetchTree(owner, repo, branch string) ([]TreeObject, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("Repo oder Branch nicht gefunden (HTTP 404)")
+		return nil, fmt.Errorf("Repository or branch not found (HTTP 404)")
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("GitHub API Fehler: %s", resp.Status)
+		return nil, fmt.Errorf("GitHub API error: %s", resp.Status)
 	}
 
 	var tr TreeResponse
@@ -135,7 +135,7 @@ func getRepoInfo(owner, repo string) (*repoInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "github-raw-ui")
+	req.Header.Set("User-Agent", "github-repo-raw-urls-ui")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -144,11 +144,11 @@ func getRepoInfo(owner, repo string) (*repoInfo, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("Repo nicht gefunden (HTTP 404)")
+		return nil, fmt.Errorf("Repository not found (HTTP 404)")
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("GitHub API Fehler (repo info): %s – %s", resp.Status, string(body))
+		return nil, fmt.Errorf("GitHub API error (repo info): %s – %s", resp.Status, string(body))
 	}
 
 	var info repoInfo
@@ -175,7 +175,7 @@ func getBranches(owner, repo string) ([]Branch, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	req.Header.Set("User-Agent", "github-raw-ui")
+	req.Header.Set("User-Agent", "github-repo-raw-urls-ui")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -184,11 +184,11 @@ func getBranches(owner, repo string) ([]Branch, string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, "", fmt.Errorf("Branches nicht gefunden (HTTP 404)")
+		return nil, "", fmt.Errorf("Branches not found (HTTP 404)")
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, "", fmt.Errorf("GitHub API Fehler (branches): %s – %s", resp.Status, string(body))
+		return nil, "", fmt.Errorf("GitHub API error (branches): %s – %s", resp.Status, string(body))
 	}
 
 	var tmp []struct {
