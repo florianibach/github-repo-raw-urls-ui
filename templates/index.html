@@ -30,7 +30,7 @@
     <div class="card-body">
       <p class="text-muted mb-4">
         Enter a public GitHub repository URL (for example
-        <code>https://github.com/florianibach/samba-admin-ui</code>), optionally select a branch and click
+        <code>https://github.com/florianibach/github-repo-raw-urls-ui</code>), optionally select a branch and click
         <strong>Scan</strong>.
       </p>
 
@@ -90,7 +90,9 @@
           You can copy this list (or parts of it) and paste it into chat.
         </p>
 
-        <pre id="rawList" class="mb-0" style="white-space: pre-wrap;">{{ range .RawURLs }}{{ . }}{{ end }}</pre>
+        {{ range .RawURLs }}
+          <span><code>{{ . }}</code></span>        
+        {{ end }}
 
       </div>
     </div>
