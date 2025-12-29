@@ -78,10 +78,7 @@ https://github.com/florianibach/github-repo-raw-urls-ui
 ### docker run
 
 ```bash
-docker run -rm \
---name github-repo-raw-urls-ui \
--p 8080:8080 \
-floibach/github-repo-raw-urls-ui
+docker run --rm --name github-repo-raw-urls-ui -p 8080:8080 floibach/github-repo-raw-urls-ui
 ````
 
 Open in your browser:
