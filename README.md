@@ -56,7 +56,7 @@ In short:
    Example:
 ```
 
-[https://github.com/florianibach/github-repo-raw-urls-ui](https://github.com/florianibach/github-repo-raw-urls-ui)
+https://github.com/florianibach/github-repo-raw-urls-ui
 
 ````
 
