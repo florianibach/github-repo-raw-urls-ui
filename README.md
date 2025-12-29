@@ -18,7 +18,7 @@ Thank you for your support!
 
 The main idea behind this tool is to make it easier to work with **AI chatbots / LLMs**.
 
-When chatting with AI systems, you usually cannot paste an entire repository:
+When chatting with AI systems, you usually cannot paste an entire repository because it is not allowed to crawl the whole repository recursively and posting each file is:
 - too large
 - too noisy
 - easy to miss files
